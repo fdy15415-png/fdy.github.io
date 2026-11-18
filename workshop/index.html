@@ -1,0 +1,72 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>甲马 · 三维印案</title><style>*{box-sizing:border-box}body{margin:0;background:#eae2d2;color:#382d23;font:16px system-ui}main{max-width:900px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}h1{font:600 30px SimSun,serif;margin:0}select,button{font:inherit;padding:10px;border-radius:4px;border:1px solid #8d7963;background:#faf4e8}button{background:#773e32;color:white;cursor:pointer}#stage{height:65vh;margin:14px 0;background:#e0d6c4}canvas{width:100%;height:100%;display:block}p{font-size:14px}dialog{border:0;background:#faf4e8;text-align:center}dialog img{display:block;max-height:72vh;max-width:78vw;margin:10px auto}
+header{padding:8px 0 14px;border-bottom:1px solid #bcb19e}header h1{font-family:'Songti SC',SimSun,serif;font-weight:600;letter-spacing:.08em}.pick{display:flex;align-items:center;gap:9px;color:#615545;font-size:14px}select{min-height:44px;background:#f9f5eb;border-color:#b4a58b;color:#392e22}
+footer{padding:12px 0;border-top:1px solid #bcb19e;gap:12px}footer strong{font-size:16px;font-weight:500}footer>div{display:flex;gap:8px}button{min-height:44px;padding:9px 18px;border-radius:5px;font-weight:600;border:1px solid #753e32;background:#753e32;color:#fff8e9}button:enabled:hover{filter:brightness(1.09)}button:active{transform:translateY(1px)}button:focus-visible,select:focus-visible{outline:3px solid #886534;outline-offset:3px}button:disabled{opacity:.62;cursor:default}#go.primary-secondary{background:transparent;color:#664739;border-color:#ad9b83}#stage{margin:10px 0}dialog{border-radius:6px;box-shadow:0 14px 60px #20180d66}dialog::backdrop{background:#231f19aa}
+@media(max-width:480px){main{padding:10px 12px}header h1{font-size:25px}footer>div{flex:1 0 100%}footer button{flex:1}#stage{height:60dvh}}
+
+:root{--ink:#322b20;--line:#ae9c7d;--song:'Noto Serif CJK SC','Source Han Serif SC','Songti SC','STSong','SimSun',serif;--fiber:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='165' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.63 .28' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23826d48' opacity='.16' filter='url(%23n)' d='M0 0h165v128H0z'/%3E%3C/svg%3E")}
+body{background-color:#e9dfc9;background-image:var(--fiber);color:var(--ink);font-family:var(--song)}
+main{max-width:1000px;padding:clamp(14px,3vw,34px);margin:0 auto}
+header{padding:0 0 16px;border-bottom:3px double var(--line);align-items:center}
+header h1{display:flex;align-items:center;gap:14px;font-family:var(--song);font-size:clamp(28px,4.2vw,44px);font-weight:600;letter-spacing:.1em;line-height:1.15}
+.seal{font-family:KaiTi,'Kaiti SC',serif;font-size:14px;line-height:1.05;letter-spacing:0;background:#914735;color:#f3e1c1;border:1px solid #82402e;padding:4px 3px;box-shadow:inset 0 0 0 1px #e2c8a7;transform:rotate(-3deg)}
+.pick{font:15px var(--song);color:#594833;gap:10px}.pick select{font:600 17px var(--song);padding:6px 9px;background-color:#f0e6cf;background-image:var(--fiber);border:0;border-bottom:1px solid #897552;border-radius:0}
+#stage{margin:13px 0 0;outline:1px solid #a39172;outline-offset:-1px}
+footer{border:0;border-bottom:3px double var(--line);padding:16px 0 18px}footer strong{font:500 18px var(--song);border-left:3px solid #984b35;padding-left:12px}
+footer button,dialog button{position:relative;border:1px solid #793e2e;border-radius:3px 2px 4px 2px;min-height:46px;padding:9px 24px;font:600 18px var(--song);letter-spacing:.09em;color:#fff1d9;background-color:#873f2f;background-image:var(--fiber),linear-gradient(105deg,#914a38,#753728);box-shadow:inset 0 0 0 2px #873f30,inset 0 0 0 3px #d2aa87,0 2px 2px #59422c32}
+#go.primary-secondary{color:#55432d;background-color:#e8dcc2;background-image:var(--fiber);border-color:#907c5a;box-shadow:inset 0 0 0 2px #eadfc7,inset 0 0 0 3px #bbab8c}
+button:enabled:active{transform:translateY(1px);filter:brightness(.96)}
+dialog{background-color:#efe4ce;background-image:var(--fiber);color:var(--ink);border:3px double var(--line)}
+@media(max-width:480px){header{padding-bottom:10px}header h1{gap:8px;font-size:27px}.seal{font-size:11px}.pick{gap:4px;font-size:13px}.pick select{font-size:15px}footer{gap:12px;padding:14px 0}footer strong{font-size:16px}footer button{padding:8px 14px}}
+@media(max-width:600px) and (orientation:portrait){
+main{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom))}
+header,footer{flex:none}#stage{flex:1 0 250px;height:auto;min-height:250px;position:relative}#stage canvas{position:absolute;inset:0}
+}
+#back-village{align-self:flex-start;margin:0 0 8px;padding:5px 10px;background:transparent;color:#654c34;border:1px solid #b29c7a;font:15px var(--song);min-height:38px}</style><main><button id="back-village" type="button">← 返回村落</button><header><h1><span class="seal" aria-hidden="true">甲<br>馬</span>甲马印案</h1><label class="pick">印样 <select id="choice" aria-label="选择印样"></select></label></header><div id="stage"></div><footer><strong id="status" role="status" aria-live="polite"></strong><div><button id="detail" hidden>放大印样</button> <button id="go" disabled>开始压印</button></div></footer></main><dialog id="zoom"><img id="large"><button onclick="document.getElementById('zoom').close()">回到印案</button></dialog><script src="print-textures.js"></script><script src="village-environment.js"></script><script>
+const names='灶神 神馬 土地山神 火神之位 水草大王 白虎之神 河泊水神 五穀神 橋神 路神 木神 家神 喜神 月神 財神 壽星 青龍 玄武 腳力神 本主娘娘'.split(' '), $=id=>document.getElementById(id);
+names.forEach((n,i)=>$('choice').add(new Option(n,i)));const initial=Number(new URLSearchParams(location.search).get('print'));$('choice').value=String(Number.isInteger(initial)&&initial>=1&&initial<=names.length?initial-1:1);
+$('back-village').onclick=()=>{if(parent!==window)parent.postMessage('return-to-village','*');else location.href='../index.html';};
+const T=THREE,scene=new T.Scene(),camera=new T.PerspectiveCamera(35,1,.1,1200),renderer=new T.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));$('stage').append(renderer.domElement);renderer.setClearColor(0,0);renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.enabled=true;scene.add(new T.HemisphereLight(0xfff7df,0x9a8572,2));const sun=new T.DirectionalLight(0xfff3db,2.6);sun.position.set(-4,5,3);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+// Fine grain follows the long axis of each timber.
+function grain() {
+ const c=document.createElement('canvas');c.width=512;c.height=192;
+ const g=c.getContext('2d');g.fillStyle='#eadbc3';g.fillRect(0,0,c.width,c.height);
+ let seed=71;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+ for(let i=0;i<740;i++){const y=rand()*192,phase=rand()*6,amp=rand()*2.5;
+ g.strokeStyle=rand()<.65?'rgba(61,34,18,.16)':'rgba(255,246,222,.4)';g.lineWidth=.25+rand()*.9;g.beginPath();
+ for(let x=0;x<=512;x+=8){const v=y+amp*Math.sin(x/80+phase)+.6*Math.sin(x/23+phase);if(x)g.lineTo(x,v);else g.moveTo(x,v)}g.stroke()}
+ const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t
+}
+const woodGrain=grain();
+function box(parent,x,y,z,w,h,d,color){const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color,map:woodGrain,roughness:.85}));mesh.position.set(x,y,z);mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh}
+addCourtyard(scene);const shop=scene.getObjectByName("甲马印纸铺");for(const child of shop.children){if(child.userData.noMerge && child.position.z>=2)child.position.y+=1.45}box(scene,0,-.12,0,3.4,.24,2.45,0x79533b);for(const x of [-1.4,1.4])for(const z of [-.93,.93])box(scene,x,-.64,z,.18,1.04,.18,0x543c2e);box(scene,0,.05,0,1.32,.1,1.86,0x553b2b);
+const press=new T.Group();scene.add(press);box(press,0,.11,0,1.15,.22,1.69,0x925e3d);for(const x of [-.27,.27])box(press,x,.32,0,.12,.25,.14,0x6d442f);box(press,0,.47,0,.75,.13,.17,0x5a3928);
+const mat=new T.MeshStandardMaterial({color:0xf6e9cd,side:T.DoubleSide,roughness:1});const paper=new T.Mesh(new T.PlaneGeometry(1.12,1.68),mat);scene.add(paper);
+let tex,seq=0,t0=null,phase='',ready=false,done=false;
+function label(s){if(phase!==s){phase=s;$('status').textContent=s}}
+function rest(){press.position.set(0,.66,0);paper.position.set(0,.108,0);paper.rotation.set(-Math.PI/2,0,0);mat.map=null;mat.color.setHex(0xf6e9cd);mat.needsUpdate=true}
+async function load(){const ticket=++seq,i=+$('choice').value;ready=done=false;t0=null;rest();$('go').disabled=true;$('detail').hidden=true;$('go').classList.remove('primary-secondary');$('go').textContent='开始压印';label('正在铺纸');const img=new Image();img.src=printTextures[i];try{await img.decode()}catch{if(ticket===seq)label('印样未载入，请重新选择');return}if(ticket!==seq)return;tex?.dispose();tex=new T.Texture(img);tex.colorSpace=T.SRGBColorSpace;tex.needsUpdate=true;$('large').src=img.src;$('large').alt=names[i];ready=true;$('go').disabled=false;label('已铺纸 · 《'+names[i]+'》')}
+$('choice').onchange=load;$('go').onclick=()=>{if(!ready)return;rest();done=false;$('go').classList.remove('primary-secondary');$('go').textContent='压印中…';$('detail').hidden=true;$('go').disabled=$('choice').disabled=true;t0=performance.now()};$('detail').onclick=()=>$('zoom').showModal();
+function ease(v){v=Math.min(1,Math.max(0,v));return v*v*(3-2*v)}
+new ResizeObserver(()=>{const w=$('stage').clientWidth,h=$('stage').clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}).observe($('stage'));
+// Small motes in the light between the press and the courtyard.
+const dustGeometry=new T.BufferGeometry(),dustPositions=[],dustPhases=[];
+for(let i=0;i<32;i++){
+ const side=i%2===0?-1:1;
+ dustPositions.push(side*(.60+Math.pow(Math.random(),1.6)*1.65),-.05+Math.random()*2.75,-4+Math.random()*5);
+ dustPhases.push(Math.random()*6.28);
+}
+dustGeometry.setAttribute('position',new T.Float32BufferAttribute(dustPositions,3));
+dustGeometry.setAttribute('phase',new T.Float32BufferAttribute(dustPhases,1));
+const dustMaterial=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{seconds:{value:0},strength:{value:1},pixels:{value:renderer.getPixelRatio()}},
+ vertexShader:`attribute float phase; uniform float seconds,pixels; varying float glow;
+ void main(){vec3 p=position;float t=seconds*.32+phase;p.x+=.12*sin(t);p.y+=.16*sin(t*.8+phase);p.z+=.08*cos(t*.6);
+ vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=pixels*clamp(55./max(1.,-mv.z),5.,13.);glow=.55+.44*pow(.5+.5*sin(t+phase),2.);}`,
+ fragmentShader:`uniform float strength;varying float glow;void main(){float r=length(gl_PointCoord-.5)*2.;float core=1.-smoothstep(.06,.36,r);float halo=1.-smoothstep(.12,1.,r);float a=core+.48*halo*(1.-core);gl_FragColor=vec4(mix(vec3(1.,.72,.26),vec3(1.,.96,.72),core),a*glow*strength);}`});
+scene.add(new T.Points(dustGeometry,dustMaterial));
+renderer.setAnimationLoop(now=>{let view=done?1:0;if(t0!==null){const t=(now-t0)/1000;if(t<1){label('印板落下…');press.position.y=.66-.50*ease(t)}else if(t<1.9){label('压实纸面…');press.position.y=.16-.052*ease((t-1)/.4)}else{if(!mat.map){mat.map=tex;mat.color.setHex(0xffffff);mat.needsUpdate=true}const lift=ease((t-1.9)/.95);press.position.set(-1.65*ease((t-2.35)/.95),.108+.98*lift,0);view=ease((t-3.3)/1.35);label(t<3.3?'提起印板':'起纸展样');paper.position.set(0,.108+1.22*view,.24*view);paper.rotation.x=-Math.PI/2*(1-view);if(t>=4.65){done=true;t0=null;$('choice').disabled=$('go').disabled=false;$('go').classList.add('primary-secondary');$('go').textContent='再印一次';$('detail').hidden=false;label('《'+names[+$('choice').value]+'》已印好')}}}
+const elapsed=t0===null?0:(now-t0)/1000;const lean=ease(elapsed/.95)*(1-ease((elapsed-1.9)/1.3));const scale=Math.max(1,.9/camera.aspect);camera.position.set((.95*(1-view))*scale,(1.95-.55*view)*scale,(4.35-.95*view-.24*lean)*scale);camera.lookAt(0,.20+1.07*view-.10*lean,0);dustMaterial.uniforms.seconds.value=now/1000;dustMaterial.uniforms.strength.value=1-.35*view;renderer.render(scene,camera)});load();
+</script></html>
+
+
+
+

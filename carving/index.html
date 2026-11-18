@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>梨木刻版坊</title><style>*{box-sizing:border-box}body{margin:0;background:#ede3ce;color:#382c20;font:16px SimSun,serif}main{max-width:900px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:8px}header{border-bottom:3px double #ab9776}h1{font-size:28px;margin:4px 0 10px}#stage{height:64vh;background:#544234;margin:12px 0;touch-action:none}canvas{display:block;width:100%;height:100%}button{font:inherit;background:#784232;color:#fff3d9;border:3px double #bb9879;padding:9px 13px;cursor:pointer}p{line-height:1.5}footer{flex-wrap:wrap}strong{margin-right:auto}</style><main><header><button id="leave" type="button">返回村落</button><h1>梨木刻版坊</h1><span>《神馬》· 梨木阳刻版</span></header><p>这块神马版只差眼睛。按住刀尖，沿金线刻出眼白，留下凸起的瞳仁。</p><div id="stage"></div><footer><strong id="label"></strong><button id="angle">侧看刀痕</button><button id="reset">重新刻版</button></footer></main><script src="woodcut.js"></script><script src="carving-faces.js"></script><script src="carving-shop.js"></script><script>
+document.getElementById('leave').onclick=()=>{if(parent!==window)parent.postMessage('return-to-village','*');else location.href='../index.html'};
+const T=THREE,$=id=>document.getElementById(id),scene=new T.Scene(),camera=new T.OrthographicCamera(),renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));$('stage').append(renderer.domElement);scene.background=new T.Color(0x554638);
+scene.add(new T.HemisphereLight(0xffeed1,0x554035,1.6));const sun=new T.DirectionalLight(0xffebc2,2.4);sun.position.set(-3,3,2);scene.add(sun);
+function mesh(geo,color,parent=scene,metal=0){const m=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:metal?.34:.82,metalness:metal}));parent.add(m);return m}
+const W=3.05,D=4.35,geo=new T.PlaneGeometry(W,D,320,450);geo.rotateX(-Math.PI/2);
+const board=mesh(geo,0xffffff),pos=geo.attributes.position,colors=new Float32Array(pos.count*3),depth=new Float32Array(pos.count);
+const base=mesh(new T.BoxGeometry(W,.32,D),0x845731);base.position.y=-.245;
+installCarvingShop(scene);
+// The print is reversed on the block. Finish the negative space beside raised lines.
+const raw=[[[188,510],[194,502],[201,498],[209,498],[216,501],[220,505],[215,512],[208,517],[200,519],[193,517],[188,510]]].map(line=>line.map(([x,y])=>[(.5-x/1024)*W,(y/1536-.5)*D]));
+const routes=raw.map(points=>{const arr=[];for(let i=1;i<points.length;i++){const [x,z]=points[i-1],[u,v]=points[i],n=Math.ceil(Math.hypot(u-x,v-z)/.008);for(let k=0;k<n;k++)arr.push([x+(u-x)*k/n,z+(v-z)*k/n])}arr.push(points.at(-1));return arr});
+const prepared=new Float32Array(pos.count);
+const guide=routes.map(path=>{const m=new T.Line(new T.BufferGeometry().setFromPoints(path.map(([x,z])=>new T.Vector3(x,.004,z))),new T.LineBasicMaterial({color:0xffcc65}));scene.add(m);return m});
+const grain=new Float32Array(pos.count);for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),w=z+.047*Math.sin(x*1.7+z)+.023*Math.sin(x*3.8+z*2);grain[i]=.91+.055*Math.sin(w*94)+.046*Math.sin(w*171)+.038*Math.sin(w*23)+.012*Math.random()}
+function shade(i){const cut=depth[i]/.078,g=grain[i]*(.27+.73*Math.min(1,cut));colors[i*3]=g*(.49+.19*cut);colors[i*3+1]=g*(.254+.15*cut);colors[i*3+2]=g*(.104+.10*cut)}
+geo.setAttribute('color',new T.BufferAttribute(colors,3));board.material.vertexColors=true;
+function carve(x,z){const ix=Math.round((x/W+.5)*320),iz=Math.round((z/D+.5)*450);for(let r=Math.max(0,iz-5);r<=Math.min(450,iz+5);r++)for(let c=Math.max(0,ix-5);c<=Math.min(320,ix+5);c++){const i=r*321+c,d=.078*(1-Math.hypot(pos.getX(i)-x,pos.getZ(i)-z)/.022);if(d>depth[i]){depth[i]=d;pos.setY(i,-d);shade(i)}}}
+const tool=new T.Group(),shaft=new T.Group();scene.add(tool);tool.add(shaft);tool.scale.setScalar(.36);shaft.rotation.z=-.52;
+const blade=mesh(new T.ConeGeometry(.085,.42,3),0xb8bdba,shaft,.82);blade.rotation.z=Math.PI/2;blade.position.x=-.21;
+function turned(x,length,a,b,color,metal){const m=mesh(new T.CylinderGeometry(a,b,length,14),color,shaft,metal);m.rotation.z=Math.PI/2;m.position.x=x}
+turned(-.48,.15,.089,.09,0xae814b,.68);turned(-.84,.61,.11,.14,0x54311d,0);turned(-1.17,.09,.11,.12,0x402717,0);
+let route,index,active=null,side=false,zoom=0,finishedAt=0,openedAt=performance.now();const eye=new T.Vector3((.5-204/1024)*W,0,(508/1536-.5)*D);const ray=new T.Raycaster(),plane=new T.Plane(new T.Vector3(0,1,0),0),hit=new T.Vector3();
+function update(){const done=route===routes.length;tool.visible=!done;$('label').textContent=done?'点睛已成 · 神馬全版':'点睛 · 沿眼纹推刀';if(!done){const a=routes[route][index],b=routes[route][Math.min(index+1,routes[route].length-1)];tool.position.set(a[0],active===null?.012:-.012,a[1]);tool.rotation.y=Math.atan2(a[1]-b[1],b[0]-a[0]);guide.forEach((m,i)=>m.visible=i===route);guide[route].geometry.setDrawRange(index,Infinity)}}
+function finishMesh(){pos.needsUpdate=geo.attributes.color.needsUpdate=true;geo.computeVertexNormals()}
+for(let i=0;i<pos.count;i++){
+ const ink=Math.min(1,Math.max(0,(pigment.charCodeAt(i)-63)/85));
+ let d=.078*ink;const x=pos.getX(i),z=pos.getZ(i);
+ for(const line of routes)for(const q of line){const dx=x-q[0],dz=z-q[1];if(Math.abs(dx)<.06&&Math.abs(dz)<.06)d=Math.min(d,.078*Math.min(1,Math.hypot(dx,dz)/.022))}
+ prepared[i]=d;
+}
+function reset(){route=index=0;active=null;side=false;openedAt=performance.now();finishedAt=0;zoom=0;depth.fill(0);for(let i=0;i<pos.count;i++){depth[i]=prepared[i];pos.setY(i,-depth[i]);shade(i)}guide.forEach(m=>m.geometry.setDrawRange(0,Infinity));finishMesh();update()}
+function locate(e){const r=renderer.domElement.getBoundingClientRect();ray.setFromCamera(new T.Vector2(2*(e.clientX-r.left)/r.width-1,1-2*(e.clientY-r.top)/r.height),camera);ray.ray.intersectPlane(plane,hit)}
+const canvas=renderer.domElement;canvas.onpointerdown=e=>{if(route>=routes.length||active!==null||zoom<.99)return;locate(e);const [x,z]=routes[route][index];if(Math.hypot(hit.x-x,hit.z-z)>.32)return;active=e.pointerId;canvas.setPointerCapture(active);update()};
+canvas.onpointermove=e=>{if(e.pointerId!==active)return;locate(e);const path=routes[route];let best=index,dist=.22;for(let i=index;i<Math.min(index+4,path.length);i++){const d=Math.hypot(path[i][0]-hit.x,path[i][1]-hit.z);if(d<dist){dist=d;best=i}}if(best===index)return;for(let i=index;i<=best;i++)carve(...path[i]);index=best;finishMesh();if(index===path.length-1){guide[route].geometry.setDrawRange(0,0);route++;finishedAt=performance.now();index=0;active=null}update()};
+canvas.onpointerup=canvas.onpointercancel=canvas.onlostpointercapture=e=>{if(active===e.pointerId){active=null;update()}};
+function smooth(v){v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)}
+function frame(){const w=$('stage').clientWidth,h=$('stage').clientHeight,aspect=w/h;
+ const now=performance.now();zoom=finishedAt?1-smooth((now-finishedAt-750)/1350):smooth((now-openedAt-1100)/1200);
+ const span=(1-zoom)*Math.max(4.95,3.95/aspect)+zoom*Math.max(.68,.85/aspect);
+ camera.left=-span*aspect/2;camera.right=-camera.left;camera.top=span/2;camera.bottom=-camera.top;camera.near=3.25;camera.far=30;
+ const target=eye.clone().multiplyScalar(zoom);camera.position.set(side?2.3:0,side?2.25:7,side?5:.001+1.3*zoom).add(target);camera.lookAt(target);camera.updateProjectionMatrix();
+ renderer.render(scene,camera)}
+$('angle').onclick=()=>{side=!side;$('angle').textContent=side?'回到正面':'侧看刀痕'};$('reset').textContent='再刻一次';$('reset').onclick=()=>{reset();$('angle').textContent='侧看刀痕'};
+new ResizeObserver(()=>renderer.setSize($('stage').clientWidth,$('stage').clientHeight,false)).observe($('stage'));reset();renderer.setAnimationLoop(frame);
+</script></html>
